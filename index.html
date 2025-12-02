@@ -63,17 +63,17 @@
         .loading-bar {
             background-color: #00ff00;
             height: 100%;
-            width: 0%; /* 游戏会自动更新这个宽度 */
-            transition: width 0.5s;
+            width: 0%; 
+            transition: width 0.2s linear; /* 线性过渡，看起来更像数据流 */
             box-shadow: 0 0 10px #00ff00;
         }
 
         .status-text {
             margin-top: 20px;
             font-size: 1.2em;
+            min-height: 1.5em; /* 占位防止跳动 */
         }
 
-        /* 闪烁动画 */
         @keyframes flicker {
             0% { opacity: 0.9; }
             5% { opacity: 0.5; }
@@ -107,7 +107,7 @@
             <div class="loading-bar" id="loadbar"></div>
         </div>
 
-        <div class="status-text" id="status">ESTABLISHING CONNECTION...</div>
+        <div class="status-text" id="status">INITIALIZING SYSTEM...</div>
     </div>
 
     <div class="corner-text bottom-right">
@@ -115,74 +115,66 @@
         SYSTEM ID: SITE-09
     </div>
 
-    <script>// ==========================================
-        //  预览专用测试代码 (正式上传前记得删除或注释掉)
+    <script>
         // ==========================================
-        
-        // 1. 模拟进入服务器的信息
-        setTimeout(function() {
-            GameDetails("SCP-RP Site-09 [CN]", "n/a", "rp_site09_v2", 64, "76561198000000000", "darkrp");
-            SetStatusChanged("Authenticating...");
-        }, 1000);
+        //  SCP 虚假数据生成器 (完全接管进度条)
+        // ==========================================
 
-        // 2. 模拟下载过程 (进度条动起来)
-        var testTotal = 100;
-        var testCurrent = 0;
-        
-        var simulation = setInterval(function() {
-            testCurrent++;
+        // 1. 定义一大堆看起来很厉害的 SCP 相关文件名
+        var fakeFiles = [
+            "SCP-173_containment_chamber.bsp",
+            "access_keycard_level5.mdl",
+            "mtf_epsilon11_voice_lines.wav",
+            "site_09_security_protocols.lua",
+            "memetic_kill_agent.vtf",
+            "dr_clef_personnel_file.txt",
+            "scp_096_face_texture_DO_NOT_VIEW.vtf",
+            "reality_anchor_stabilizer.mdl",
+            "goc_intrusion_countermeasures.exe",
+            "alpha_warhead_codes.dat",
+            "containment_breach_alarm.mp3"
+        ];
+
+        // 2. 状态变量
+        var progress = 0;
+        var maxProgress = 100;
+        var speed = 150; // 刷新速度 (毫秒)
+
+        // 3. 核心循环：不管 GMod 说什么，我们自己跑自己的
+        setInterval(function() {
+            // 增加进度 (随机增加 0.5% 到 3%)
+            progress += Math.random() * 3;
             
-            // 告诉进度条还剩多少文件
-            SetFilesTotal(testTotal);
-            SetFilesNeeded(testTotal - testCurrent);
-            
-            // 随机显示一些文件名，增加黑客感
-            var fakeFiles = ["models/scp173.mdl", "textures/facility_wall.vtf", "sounds/alarm.wav", "lua/autorun/cl_init.lua", "materials/scp_logo.png"];
+            // 随机显示一个文件名
             var randomFile = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
-            DownloadingFile(randomFile);
-
-            // 加载完了就停止
-            if (testCurrent >= testTotal) {
-                clearInterval(simulation);
-                SetStatusChanged("Sending Client Info...");
-                setTimeout(() => {
-                    SetStatusChanged("Workshop Complete. Starting Lua...");
-                }, 1000);
+            
+            // 更新文字
+            if (progress < 100) {
+                document.getElementById('status').innerText = "DOWNLOADING: " + randomFile.toUpperCase();
+                document.getElementById('loadbar').style.width = progress + '%';
+            } else {
+                // 如果跑满了，显示几秒钟完成，然后重置（模拟加载不同阶段）
+                document.getElementById('status').innerText = "VERIFYING DATA INTEGRITY... [COMPLETE]";
+                document.getElementById('loadbar').style.width = '100%';
+                
+                // 3秒后重置，制造“还有下一阶段”的假象
+                if (progress > 130) { 
+                    progress = 0; // 重置进度
+                    document.getElementById('status').innerText = "LOADING NEXT SECTOR...";
+                }
             }
-        }, 100); // 每100毫秒加载一个文件
-        // GMod 会自动调用这个函数来更新进度
-        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-            // 这里可以获取服务器名字，如果你想显示的话
-        }
 
-        function SetStatusChanged(status) {
-            document.getElementById('status').innerText = status.toUpperCase();
-        }
+        }, speed);
 
-        function DownloadingFile(fileName) {
-            document.getElementById('status').innerText = "DOWNLOADING: " + fileName.toUpperCase();
-        }
-
-        // 这是一个估算的进度更新，GMod实际上不直接给百分比，通常靠文件数估算
-        // 或者简单的让它动起来装装样子
-        var filesTotal = 50; // 假设的文件数
-        var filesLeft = 50;
-
-        function SetFilesTotal(total) {
-            filesTotal = total;
-            filesLeft = total;
-        }
-
-        function SetFilesNeeded(needed) {
-            filesLeft = needed;
-            var percentage = 100 - Math.round((filesLeft / filesTotal) * 100);
-            // 简单的防回退逻辑
-            var currentWidth = document.getElementById('loadbar').style.width;
-            if(percentage > parseInt(currentWidth)) {
-                document.getElementById('loadbar').style.width = percentage + '%';
-            }
-        }
+        // ==========================================
+        //  GMod 接口屏蔽区 (防止真实进度干扰我们)
+        // ==========================================
+        // 这些空函数是为了防止 GMod 调用时报错，但它们什么都不做
+        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {}
+        function SetStatusChanged(status) {}
+        function DownloadingFile(fileName) {}
+        function SetFilesTotal(total) {}
+        function SetFilesNeeded(needed) {}
     </script>
 </body>
 </html>
-
