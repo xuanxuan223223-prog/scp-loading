@@ -115,7 +115,41 @@
         SYSTEM ID: SITE-09
     </div>
 
-    <script>
+    <script>// ==========================================
+        //  预览专用测试代码 (正式上传前记得删除或注释掉)
+        // ==========================================
+        
+        // 1. 模拟进入服务器的信息
+        setTimeout(function() {
+            GameDetails("SCP-RP Site-09 [CN]", "n/a", "rp_site09_v2", 64, "76561198000000000", "darkrp");
+            SetStatusChanged("Authenticating...");
+        }, 1000);
+
+        // 2. 模拟下载过程 (进度条动起来)
+        var testTotal = 100;
+        var testCurrent = 0;
+        
+        var simulation = setInterval(function() {
+            testCurrent++;
+            
+            // 告诉进度条还剩多少文件
+            SetFilesTotal(testTotal);
+            SetFilesNeeded(testTotal - testCurrent);
+            
+            // 随机显示一些文件名，增加黑客感
+            var fakeFiles = ["models/scp173.mdl", "textures/facility_wall.vtf", "sounds/alarm.wav", "lua/autorun/cl_init.lua", "materials/scp_logo.png"];
+            var randomFile = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
+            DownloadingFile(randomFile);
+
+            // 加载完了就停止
+            if (testCurrent >= testTotal) {
+                clearInterval(simulation);
+                SetStatusChanged("Sending Client Info...");
+                setTimeout(() => {
+                    SetStatusChanged("Workshop Complete. Starting Lua...");
+                }, 1000);
+            }
+        }, 100); // 每100毫秒加载一个文件
         // GMod 会自动调用这个函数来更新进度
         function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
             // 这里可以获取服务器名字，如果你想显示的话
@@ -151,3 +185,4 @@
     </script>
 </body>
 </html>
+
