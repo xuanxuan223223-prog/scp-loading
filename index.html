@@ -2,87 +2,152 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>SCP Secure Terminal</title>
-    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
+    <title>SCP Foundation Loading</title>
     <style>
-        :root {
-            --term-green: #33ff00;
-            --term-dim: #1a8000;
-            --bg-color: #050505;
-        }
-
         body {
-            background-color: var(--bg-color);
-            color: var(--term-green);
-            font-family: 'VT323', monospace;
-            margin: 0;
-            padding: 20px;
-            height: 100vh;
-            box-sizing: border-box;
+            background-color: #050505;
+            color: #00ff00;
+            font-family: "Courier New", Courier, monospace;
             overflow: hidden;
-            font-size: 22px;
-            text-transform: uppercase;
+            margin: 0;
+            padding: 50px;
+            text-shadow: 0 0 5px #00ff00;
         }
 
-        /* CRT 屏幕效果 */
-        body::before {
-            content: " ";
-            display: block;
-            position: absolute;
-            top: 0; left: 0; bottom: 0; right: 0;
+        /* 扫描线效果 */
+        .scanlines {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
             background-size: 100% 2px, 3px 100%;
             pointer-events: none;
-            z-index: 100;
-        }
-        
-        /* 布局网格 */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr; /* 左边宽，右边窄 */
-            grid-template-rows: auto 1fr auto;
-            height: 95vh;
-            border: 2px solid var(--term-dim);
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(51, 255, 0, 0.1);
+            z-index: 10;
         }
 
-        /* 顶部标题区 */
-        .header {
-            grid-column: 1 / -1;
-            border-bottom: 2px solid var(--term-dim);
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 3em;
-            line-height: 0.8;
-            text-shadow: 0 0 10px var(--term-green);
-        }
-
-        .sub-header {
-            color: var(--term-dim);
-            font-size: 1.2em;
-        }
-
-        /* 左侧：主要信息区 */
-        .content-area {
-            padding-right: 20px;
+        /* 居中容器 */
+        .container {
             display: flex;
             flex-direction: column;
             justify-content: center;
+            align-items: center;
+            height: 80vh;
         }
 
-        /* 右侧：数据流装饰区 */
-        .sidebar {
-            border-left: 2px solid var(--term-dim);
-            padding-left: 20px;
-            font
+        h1 {
+            font-size: 4em;
+            margin-bottom: 0;
+            letter-spacing: 5px;
+            animation: flicker 2s infinite;
+        }
 
+        h2 {
+            font-size: 1.5em;
+            margin-top: 10px;
+            opacity: 0.8;
+        }
 
+        /* 进度条外框 */
+        .loading-box {
+            border: 2px solid #00ff00;
+            width: 60%;
+            height: 30px;
+            margin-top: 50px;
+            padding: 3px;
+            position: relative;
+        }
 
+        /* 进度条本体 */
+        .loading-bar {
+            background-color: #00ff00;
+            height: 100%;
+            width: 0%; /* 游戏会自动更新这个宽度 */
+            transition: width 0.5s;
+            box-shadow: 0 0 10px #00ff00;
+        }
+
+        .status-text {
+            margin-top: 20px;
+            font-size: 1.2em;
+        }
+
+        /* 闪烁动画 */
+        @keyframes flicker {
+            0% { opacity: 0.9; }
+            5% { opacity: 0.5; }
+            10% { opacity: 0.9; }
+            100% { opacity: 0.9; }
+        }
+
+        .corner-text {
+            position: absolute;
+            font-size: 0.8em;
+            opacity: 0.6;
+        }
+        .top-left { top: 20px; left: 20px; }
+        .bottom-right { bottom: 20px; right: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="scanlines"></div>
+
+    <div class="corner-text top-left">
+        SECURE TERMINAL UPLINK<br>
+        PROTOCOL: OMEGA-7
+    </div>
+
+    <div class="container">
+        <h1>SCP FOUNDATION</h1>
+        <h2>SECURE. CONTAIN. PROTECT.</h2>
+
+        <div class="loading-box">
+            <div class="loading-bar" id="loadbar"></div>
+        </div>
+
+        <div class="status-text" id="status">ESTABLISHING CONNECTION...</div>
+    </div>
+
+    <div class="corner-text bottom-right">
+        UNAUTHORIZED ACCESS IS FORBIDDEN<br>
+        SYSTEM ID: SITE-09
+    </div>
+
+    <script>
+        // GMod 会自动调用这个函数来更新进度
+        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
+            // 这里可以获取服务器名字，如果你想显示的话
+        }
+
+        function SetStatusChanged(status) {
+            document.getElementById('status').innerText = status.toUpperCase();
+        }
+
+        function DownloadingFile(fileName) {
+            document.getElementById('status').innerText = "DOWNLOADING: " + fileName.toUpperCase();
+        }
+
+        // 这是一个估算的进度更新，GMod实际上不直接给百分比，通常靠文件数估算
+        // 或者简单的让它动起来装装样子
+        var filesTotal = 50; // 假设的文件数
+        var filesLeft = 50;
+
+        function SetFilesTotal(total) {
+            filesTotal = total;
+            filesLeft = total;
+        }
+
+        function SetFilesNeeded(needed) {
+            filesLeft = needed;
+            var percentage = 100 - Math.round((filesLeft / filesTotal) * 100);
+            // 简单的防回退逻辑
+            var currentWidth = document.getElementById('loadbar').style.width;
+            if(percentage > parseInt(currentWidth)) {
+                document.getElementById('loadbar').style.width = percentage + '%';
+            }
+        }
+    </script>
+</body>
+</html>
