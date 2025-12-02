@@ -2,252 +2,87 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>SCP Secure Access</title>
-    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>SCP Secure Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --term-green: #33ff00;
+            --term-dim: #1a8000;
+            --bg-color: #050505;
+        }
+
         body {
-            background-color: #111;
-            color: #eee;
-            font-family: 'Share Tech Mono', monospace;
+            background-color: var(--bg-color);
+            color: var(--term-green);
+            font-family: 'VT323', monospace;
             margin: 0;
-            padding: 0;
-            overflow: hidden;
+            padding: 20px;
             height: 100vh;
+            box-sizing: border-box;
+            overflow: hidden;
+            font-size: 22px;
+            text-transform: uppercase;
+        }
+
+        /* CRT 屏幕效果 */
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 2px, 3px 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+        
+        /* 布局网格 */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* 左边宽，右边窄 */
+            grid-template-rows: auto 1fr auto;
+            height: 95vh;
+            border: 2px solid var(--term-dim);
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(51, 255, 0, 0.1);
+        }
+
+        /* 顶部标题区 */
+        .header {
+            grid-column: 1 / -1;
+            border-bottom: 2px solid var(--term-dim);
+            padding-bottom: 10px;
+            margin-bottom: 20px;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            /* 背景纹理 */
-            background-image: radial-gradient(circle at center, #2a2a2a 0%, #000 100%);
-        }
-
-        /* 背景红光呼吸效果 */
-        .alert-overlay {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: radial-gradient(circle, transparent 60%, rgba(200, 0, 0, 0.1) 100%);
-            animation: breathe 4s infinite ease-in-out;
-            z-index: 0;
-            pointer-events: none;
-        }
-
-        /* 中心的安保卡片 */
-        .security-card {
-            background: rgba(20, 20, 20, 0.9);
-            border: 1px solid #444;
-            border-top: 4px solid #cc0000; /* 顶部的红色警戒条 */
-            width: 700px;
-            padding: 40px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.8), 0 0 10px rgba(255, 0, 0, 0.2);
-            position: relative;
-            z-index: 10;
-            backdrop-filter: blur(5px);
-        }
-
-        /* 扫描线装饰 */
-        .security-card::before {
-            content: "";
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: repeating-linear-gradient(
-                0deg,
-                rgba(0,0,0,0.15),
-                rgba(0,0,0,0.15) 1px,
-                transparent 1px,
-                transparent 2px
-            );
-            pointer-events: none;
-            z-index: -1;
+            justify-content: space-between;
+            align-items: flex-end;
         }
 
         h1 {
-            font-size: 3em;
             margin: 0;
-            color: #fff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid #333;
-            padding-bottom: 10px;
+            font-size: 3em;
+            line-height: 0.8;
+            text-shadow: 0 0 10px var(--term-green);
         }
 
-        .subtitle {
-            color: #cc0000; /* 警示红 */
+        .sub-header {
+            color: var(--term-dim);
             font-size: 1.2em;
-            margin-top: 5px;
-            font-weight: bold;
         }
 
-        .scp-logo {
-            position: absolute;
-            top: 30px;
-            right: 40px;
-            width: 80px;
-            height: 80px;
-            border: 3px solid #eee;
-            border-radius: 50%;
+        /* 左侧：主要信息区 */
+        .content-area {
+            padding-right: 20px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             justify-content: center;
-            font-weight: bold;
-            font-size: 1.5em;
-            opacity: 0.8;
         }
 
-        /* 进度条区域 */
-        .loader-container {
-            margin-top: 40px;
-        }
+        /* 右侧：数据流装饰区 */
+        .sidebar {
+            border-left: 2px solid var(--term-dim);
+            padding-left: 20px;
+            font
 
-        .loading-text {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 5px;
-            font-size: 1.1em;
-            color: #aaa;
-        }
-
-        .progress-track {
-            background: #222;
-            height: 20px;
-            border: 1px solid #555;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-bar {
-            background: #fff;
-            height: 100%;
-            width: 0%;
-            transition: width 0.3s ease;
-            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
-        }
-
-        /* 动态滚动的哈希码装饰 */
-        .data-stream {
-            margin-top: 20px;
-            font-size: 0.8em;
-            color: #555;
-            height: 60px;
-            overflow: hidden;
-            border-left: 2px solid #cc0000;
-            padding-left: 10px;
-        }
-
-        /* 警告印章 */
-        .stamp {
-            position: absolute;
-            bottom: -20px;
-            right: -20px;
-            border: 4px solid rgba(200, 0, 0, 0.4);
-            color: rgba(200, 0, 0, 0.4);
-            font-size: 2em;
-            padding: 10px 20px;
-            transform: rotate(-15deg);
-            font-weight: bold;
-            letter-spacing: 5px;
-            pointer-events: none;
-        }
-
-        @keyframes breathe {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
-        }
-
-        .footer-info {
-            position: absolute;
-            bottom: 20px;
-            width: 100%;
-            text-align: center;
-            font-size: 0.8em;
-            color: #444;
-            z-index: 10;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="alert-overlay"></div>
-
-    <div class="security-card">
-        <div class="scp-logo">SCP</div>
-        
-        <h1>System Access</h1>
-        <div class="subtitle">CLEARANCE LEVEL 4 REQUIRED</div>
-        <div class="subtitle" style="font-size: 0.9em; color: #666;">AUTHORIZATION: O5-COUNCIL</div>
-
-        <div class="loader-container">
-            <div class="loading-text">
-                <span id="status">CONNECTING TO SECURE NETWORK...</span>
-                <span id="percentage">0%</span>
-            </div>
-            <div class="progress-track">
-                <div class="progress-bar" id="loadbar"></div>
-            </div>
-        </div>
-
-        <div class="data-stream" id="console-log">
-            INITIALIZING MEMETIC COUNTER-AGENTS...<br>
-            VERIFYING BIOMETRIC HASH...<br>
-            ACCESSING DATABASE: SITE-09...
-        </div>
-
-        <div class="stamp">TOP SECRET</div>
-    </div>
-
-    <div class="footer-info">
-        WARNING: UNAUTHORIZED ACCESS TO THIS TERMINAL IS PUNISHABLE BY IMMEDIATE TERMINATION.<br>
-        SECURE. CONTAIN. PROTECT.
-    </div>
-
-    <script>
-        // === 核心逻辑 ===
-        var totalFiles = 0;
-        var filesLeft = 0;
-
-        // GMod 传入服务器信息
-        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {
-            // 你可以在这里把 servername 显示在页面上
-        }
-
-        // 状态文字更新
-        function SetStatusChanged(status) {
-            document.getElementById('status').innerText = status.toUpperCase();
-            logData("STATUS: " + status);
-        }
-
-        // 正在下载某个文件
-        function DownloadingFile(fileName) {
-            document.getElementById('status').innerText = "DOWNLOADING DATA...";
-            logData("FETCHING: " + fileName);
-        }
-
-        // 文件总数
-        function SetFilesTotal(total) {
-            totalFiles = total;
-        }
-
-        // 剩余文件数 (计算百分比的核心)
-        function SetFilesNeeded(needed) {
-            filesLeft = needed;
-            var p = 0;
-            if (totalFiles > 0) {
-                p = Math.floor(((totalFiles - needed) / totalFiles) * 100);
-            }
-            // 限制一下，防止溢出
-            if (p > 100) p = 100;
-            if (p < 0) p = 0;
-
-            document.getElementById('loadbar').style.width = p + "%";
-            document.getElementById('percentage').innerText = p + "%";
-        }
-
-        // 一个简单的小功能：把最新的日志推到那个红色小框框里
-        function logData(text) {
-            var consoleDiv = document.getElementById('console-log');
-            consoleDiv.innerHTML = text.toUpperCase() + "<br>" + consoleDiv.innerHTML;
-        }
-    </script>
-</body>
-</html>
-</html>
 
 
