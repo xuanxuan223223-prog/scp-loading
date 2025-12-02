@@ -14,20 +14,15 @@
             text-shadow: 0 0 5px #00ff00;
         }
 
-        /* 扫描线效果 */
         .scanlines {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
+            top: 0; left: 0; width: 100vw; height: 100vh;
             background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
             background-size: 100% 2px, 3px 100%;
             pointer-events: none;
             z-index: 10;
         }
 
-        /* 居中容器 */
         .container {
             display: flex;
             flex-direction: column;
@@ -43,13 +38,8 @@
             animation: flicker 2s infinite;
         }
 
-        h2 {
-            font-size: 1.5em;
-            margin-top: 10px;
-            opacity: 0.8;
-        }
+        h2 { font-size: 1.5em; margin-top: 10px; opacity: 0.8; }
 
-        /* 进度条外框 */
         .loading-box {
             border: 2px solid #00ff00;
             width: 60%;
@@ -59,122 +49,86 @@
             position: relative;
         }
 
-        /* 进度条本体 */
         .loading-bar {
             background-color: #00ff00;
             height: 100%;
-            width: 0%; 
-            transition: width 0.2s linear; /* 线性过渡，看起来更像数据流 */
+            width: 0%;
+            transition: width 0.2s linear; /* 线性平滑移动 */
             box-shadow: 0 0 10px #00ff00;
         }
 
         .status-text {
             margin-top: 20px;
             font-size: 1.2em;
-            min-height: 1.5em; /* 占位防止跳动 */
+            min-height: 1.5em;
         }
 
         @keyframes flicker {
-            0% { opacity: 0.9; }
-            5% { opacity: 0.5; }
-            10% { opacity: 0.9; }
-            100% { opacity: 0.9; }
+            0% { opacity: 0.9; } 5% { opacity: 0.5; } 10% { opacity: 0.9; } 100% { opacity: 0.9; }
         }
 
-        .corner-text {
-            position: absolute;
-            font-size: 0.8em;
-            opacity: 0.6;
-        }
+        .corner-text { position: absolute; font-size: 0.8em; opacity: 0.6; }
         .top-left { top: 20px; left: 20px; }
         .bottom-right { bottom: 20px; right: 20px; }
     </style>
 </head>
 <body>
-
     <div class="scanlines"></div>
-
-    <div class="corner-text top-left">
-        SECURE TERMINAL UPLINK<br>
-        PROTOCOL: OMEGA-7
-    </div>
+    <div class="corner-text top-left">SECURE TERMINAL UPLINK<br>PROTOCOL: OMEGA-7</div>
 
     <div class="container">
         <h1>SCP FOUNDATION</h1>
         <h2>SECURE. CONTAIN. PROTECT.</h2>
-
         <div class="loading-box">
             <div class="loading-bar" id="loadbar"></div>
         </div>
-
         <div class="status-text" id="status">INITIALIZING SYSTEM...</div>
     </div>
 
-    <div class="corner-text bottom-right">
-        UNAUTHORIZED ACCESS IS FORBIDDEN<br>
-        SYSTEM ID: SITE-09
-    </div>
+    <div class="corner-text bottom-right">UNAUTHORIZED ACCESS IS FORBIDDEN<br>SYSTEM ID: SITE-09</div>
 
     <script>
-        // ==========================================
-        //  SCP 虚假数据生成器 (完全接管进度条)
-        // ==========================================
-
-        // 1. 定义一大堆看起来很厉害的 SCP 相关文件名
+        // === 假动画配置 ===
+        var progress = 0;
+        
+        // 假文件列表
         var fakeFiles = [
-            "SCP-173_containment_chamber.bsp",
-            "access_keycard_level5.mdl",
-            "mtf_epsilon11_voice_lines.wav",
-            "site_09_security_protocols.lua",
-            "memetic_kill_agent.vtf",
-            "dr_clef_personnel_file.txt",
-            "scp_096_face_texture_DO_NOT_VIEW.vtf",
-            "reality_anchor_stabilizer.mdl",
-            "goc_intrusion_countermeasures.exe",
-            "alpha_warhead_codes.dat",
-            "containment_breach_alarm.mp3"
+            "SCP-173_protocol.dat", "mtf_epsilon11_comms.ogg", 
+            "site_09_blueprint.bsp", "memetic_hazard_shield.exe", 
+            "class_d_roster.txt", "reality_anchor.mdl",
+            "scp_096_face_scramble.vtf", "containment_breach.log"
         ];
 
-        // 2. 状态变量
-        var progress = 0;
-        var maxProgress = 100;
-        var speed = 150; // 刷新速度 (毫秒)
-
-        // 3. 核心循环：不管 GMod 说什么，我们自己跑自己的
+        // 核心循环：每 100 毫秒动一次
         setInterval(function() {
-            // 增加进度 (随机增加 0.5% 到 3%)
-            progress += Math.random() * 3;
-            
-            // 随机显示一个文件名
-            var randomFile = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
-            
-            // 更新文字
+            // 每次随机增加 0.5% 到 2% 的进度
+            progress += Math.random() * 2;
+
             if (progress < 100) {
-                document.getElementById('status').innerText = "DOWNLOADING: " + randomFile.toUpperCase();
+                // 正在加载中...
+                var randomFile = fakeFiles[Math.floor(Math.random() * fakeFiles.length)];
                 document.getElementById('loadbar').style.width = progress + '%';
+                document.getElementById('status').innerText = "DOWNLOADING: " + randomFile;
             } else {
-                // 如果跑满了，显示几秒钟完成，然后重置（模拟加载不同阶段）
-                document.getElementById('status').innerText = "VERIFYING DATA INTEGRITY... [COMPLETE]";
+                // 加载满了
                 document.getElementById('loadbar').style.width = '100%';
-                
-                // 3秒后重置，制造“还有下一阶段”的假象
-                if (progress > 130) { 
-                    progress = 0; // 重置进度
-                    document.getElementById('status').innerText = "LOADING NEXT SECTOR...";
+                document.getElementById('status').innerText = "VERIFYING DATA... [COMPLETE]";
+
+                // 超过 120% 时（稍微停顿一下），重置为 0，开始下一轮循环
+                if (progress > 120) {
+                    progress = 0;
+                    document.getElementById('status').innerText = "RE-INITIALIZING CONNECTION...";
                 }
             }
+        }, 100);
 
-        }, speed);
-
-        // ==========================================
-        //  GMod 接口屏蔽区 (防止真实进度干扰我们)
-        // ==========================================
-        // 这些空函数是为了防止 GMod 调用时报错，但它们什么都不做
-        function GameDetails(servername, serverurl, mapname, maxplayers, steamid, gamemode) {}
-        function SetStatusChanged(status) {}
-        function DownloadingFile(fileName) {}
-        function SetFilesTotal(total) {}
-        function SetFilesNeeded(needed) {}
+        // === 屏蔽 GMod 真实信号 (防止干扰我们的动画) ===
+        function GameDetails() {}
+        function SetStatusChanged() {}
+        function DownloadingFile() {}
+        function SetFilesTotal() {}
+        function SetFilesNeeded() {}
     </script>
 </body>
 </html>
+
