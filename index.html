@@ -94,7 +94,7 @@
 </head>
 <body>
 
-    <audio id="bgm" autoplay loop preload="auto">
+    <audio id="bgm" autoplay loop>
         <source src="bgm.mp3" type="audio/mpeg">
     </audio>
 
@@ -126,21 +126,19 @@
     </div>
 
     <script>
-        // === 音频控制 (双重保险) ===
-        // 在 GMod 环境下，这通常能成功
-        window.addEventListener('load', function() {
-            var audio = document.getElementById("bgm");
-            audio.volume = 0.5; // 50% 音量
-            
-            var playPromise = audio.play();
-            if (playPromise !== undefined) {
-                playPromise.then(_ => {
-                    console.log("Audio playing in GMod!");
-                }).catch(error => {
-                    console.log("Browser blocked audio. This is expected outside of GMod.");
-                });
-            }
-        });
+        // === 音频控制 ===
+        var audio = document.getElementById("bgm");
+        audio.volume = 0.5; // 音量 50%
+        
+        // 尝试自动播放 (GMod 内置浏览器通常允许)
+        var promise = audio.play();
+        if (promise !== undefined) {
+            promise.then(_ => {
+                // 播放成功
+            }).catch(error => {
+                console.log("Audio autoplay blocked (Expected in external browsers)");
+            });
+        }
 
         // === 获取用户信息 ===
         function getParam(name) {
