@@ -68,6 +68,7 @@
         /* 3. 布局 */
         .container {
             display: flex; flex-direction: column; align-items: center; width: 80%; z-index: 5;
+            margin-left: 120px; 
         }
         .loading-box {
             border: 2px solid #00ff00; width: 100%; height: 20px; margin: 30px 0; padding: 2px;
@@ -93,7 +94,7 @@
 </head>
 <body>
 
-    <audio id="bgm" loop preload="auto">
+    <audio id="bgm" autoplay loop preload="auto">
         <source src="bgm.mp3" type="audio/mpeg">
     </audio>
 
@@ -125,25 +126,21 @@
     </div>
 
     <script>
-        // === 音频控制 (强化版) ===
-        var audio = document.getElementById("bgm");
-        audio.volume = 0.5; // 音量 50%
-        
-        // 尝试强制播放
-        window.onload = function() {
-            var promise = audio.play();
-            if (promise !== undefined) {
-                promise.then(_ => {
-                    console.log("Audio started!");
+        // === 音频控制 (双重保险) ===
+        // 在 GMod 环境下，这通常能成功
+        window.addEventListener('load', function() {
+            var audio = document.getElementById("bgm");
+            audio.volume = 0.5; // 50% 音量
+            
+            var playPromise = audio.play();
+            if (playPromise !== undefined) {
+                playPromise.then(_ => {
+                    console.log("Audio playing in GMod!");
                 }).catch(error => {
-                    console.log("Audio autoplay blocked. Waiting for interaction.");
-                    // 如果被拦截，尝试在第一次点击时播放（虽然加载界面玩家很少点击）
-                    document.body.addEventListener('click', function() {
-                        audio.play();
-                    });
+                    console.log("Browser blocked audio. This is expected outside of GMod.");
                 });
             }
-        };
+        });
 
         // === 获取用户信息 ===
         function getParam(name) {
