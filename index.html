@@ -93,7 +93,7 @@
 </head>
 <body>
 
-    <audio id="bgm" autoplay loop>
+    <audio id="bgm" loop preload="auto">
         <source src="bgm.mp3" type="audio/mpeg">
     </audio>
 
@@ -125,13 +125,25 @@
     </div>
 
     <script>
-        // === 音频控制 (在这里修改音量) ===
+        // === 音频控制 (强化版) ===
         var audio = document.getElementById("bgm");
+        audio.volume = 0.5; // 音量 50%
         
-        // 0.5 代表 50% 音量。如果你想要最大音量，改成 1.0
-        audio.volume = 0.5; 
-        
-        audio.play().catch(e => console.log("Audio autoplay blocked by browser"));
+        // 尝试强制播放
+        window.onload = function() {
+            var promise = audio.play();
+            if (promise !== undefined) {
+                promise.then(_ => {
+                    console.log("Audio started!");
+                }).catch(error => {
+                    console.log("Audio autoplay blocked. Waiting for interaction.");
+                    // 如果被拦截，尝试在第一次点击时播放（虽然加载界面玩家很少点击）
+                    document.body.addEventListener('click', function() {
+                        audio.play();
+                    });
+                });
+            }
+        };
 
         // === 获取用户信息 ===
         function getParam(name) {
